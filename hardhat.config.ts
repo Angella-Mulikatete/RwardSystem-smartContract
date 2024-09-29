@@ -16,9 +16,19 @@ const config: HardhatUserConfig = {
   },
   
   etherscan: {
-    apiKey:{
-      // arbitrumSepolia: "11XBITUSRTETURM7D2JTXPE49ZG84GPMX7",
-    }
+    apiKey: {
+      scrollSepolia: process.env.ETHERSCAN_API_KEY!,
+    },
+    customChains: [
+      {
+        network: 'scrollSepolia',
+        chainId: 534351,
+        urls: {
+          apiURL: 'https://api-sepolia.scrollscan.com/api',
+          browserURL: 'https://sepolia.scrollscan.com/',
+        },
+      },
+    ],
   },
 };
 

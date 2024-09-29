@@ -12,19 +12,20 @@ contract PlasticContributionNFT is ERC721URIStorage, Ownable {
     // Counters.Counter private _tokenIds;
     uint256 private _tokenIds;
 
-    // Levels for different contribution stages
-    enum NFTLevel { Level1, Level2, Level3 }
+    enum NFTLevel { Level1, Level2, Level3 } // Levels for different contribution stages
 
-    // Metadata URIs for different levels
    
+    uint256 public constant CONTRIBUTION_THRESHOLD = 4;  // Contribution count required to upgrade to the next level
+    mapping(address => uint256) public userContributions; // Mapping to track user contributions
+    mapping(uint256 => NFTLevel) public tokenLevel;  // Mapping to store the level of each minted NFT by token ID
 
-    // Contribution count required to upgrade to the next level
-    uint256 public constant CONTRIBUTION_THRESHOLD = 4;
+    event NFTMinted(address indexed recipient, uint256 tokenId, NFTLevel level);
+    event URIUpdated(NFTLevel indexed level, string newURI);
+    event ContributionUpdated(address indexed recipient, uint256 newContribution);
+    event NFTLevelUpgraded(uint256 indexed tokenId, NFTLevel newLevel);
 
-    // Mapping to track user contributions
-    mapping(address => uint256) public userContributions;
-    // Mapping to store the level of each minted NFT by token ID
-    mapping(uint256 => NFTLevel) public tokenLevel;
+    error Unauthorized(); // Thrown when the caller is not authorized
+    error InvalidTokenId(); // Thrown when a token ID does not exist
     
     string public level1URI = "https://violet-major-ocelot-686.mypinata.cloud/ipfs/QmPjACyCpF2sB6DaYRjWgKToEhspNvSzKGLLJjc3vucYbQ";
     string public level2URI = "https://violet-major-ocelot-686.mypinata.cloud/ipfs/QmPjACyCpF2sB6DaYRjWgKToEhspNvSzKGLLJjc3vucYbQ";
@@ -51,6 +52,7 @@ contract PlasticContributionNFT is ERC721URIStorage, Ownable {
         // Update the level and reset contributions if user reaches the next level
         tokenLevel[newItemId] = level;
         updateContributions(recipient);
+        emit NFTMinted(recipient, newItemId, level);
 
         return newItemId;
     }
@@ -69,6 +71,8 @@ contract PlasticContributionNFT is ERC721URIStorage, Ownable {
     // Update user contributions and reset if they reach a new level
     function updateContributions(address recipient) internal {
         userContributions[recipient]++;
+
+        emit ContributionUpdated(recipient, userContributions[recipient]);
         
         if (userContributions[recipient] > CONTRIBUTION_THRESHOLD * 2) {
             userContributions[recipient] = 0; // Reset contributions after reaching Level 3
@@ -95,9 +99,13 @@ contract PlasticContributionNFT is ERC721URIStorage, Ownable {
         level1URI = _level1URI;
         level2URI = _level2URI;
         level3URI = _level3URI;
+
+        emit URIUpdated(NFTLevel.Level1, _level1URI);
+        emit URIUpdated(NFTLevel.Level2, _level2URI);
+        emit URIUpdated(NFTLevel.Level3, _level3URI);
     }
 
-    // Optional function to retrieve the level of an NFT by token ID
+    //retrieve the level of an NFT by token ID
     function getNFTLevel(uint256 tokenId) public view returns (NFTLevel) {
         return tokenLevel[tokenId];
     }

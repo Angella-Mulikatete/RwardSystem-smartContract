@@ -20,4 +20,6 @@ contract CauseKoin is ERC20 {
     }
 
     
+    // CauseKoinModule#CauseKoin - 0x4A5097c697397E6b790A7f8B59EB9CE556A1D6D4
+
 }
